@@ -29,13 +29,14 @@ async def get_current_user(
         if user_id is None:
             raise credentials_exception
 
+        user_uuid = UUID(user_id)
         user = await db.scalar(
-            select(User).where(User.id == UUID(user_id))
+            select(User).where(User.id == user_uuid)
         )
 
         if user is None:
             raise credentials_exception
 
         return user
-    except JWTError:
+    except (JWTError, ValueError, TypeError):
         raise credentials_exception
