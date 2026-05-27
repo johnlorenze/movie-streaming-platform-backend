@@ -9,5 +9,10 @@ wheels/
 # Virtual environments
 .venv
 
-# DB files
-*.sqlite3
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Alembic
+alembic/versions/*.pyc
