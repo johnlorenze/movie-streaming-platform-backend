@@ -2,6 +2,7 @@ import logging
 from fastapi import HTTPException, status
 from fastapi.concurrency import run_in_threadpool
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from app.core.security import hash_password, verify_password, create_access_token
 from app.db.models import User
 from app.schemas.auth import RegisterResponse, TokenResponse
@@ -20,7 +21,7 @@ class AuthService:
             select(User).where(User.email == email)
         )
 
-        print("is_existing_user:", is_existing_user)
+        logger.debug("Checking for existing user during registration")
 
         if is_existing_user:
             raise HTTPException(
@@ -34,8 +35,16 @@ class AuthService:
         )
 
         self.db.add(user)
-        await self.db.commit()
-        await self.db.refresh(user)
+
+        try:
+            await self.db.commit()
+            await self.db.refresh(user)
+        except IntegrityError:
+            await self.db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered",
+            )
 
         return RegisterResponse(
             message="User registered successfully",
