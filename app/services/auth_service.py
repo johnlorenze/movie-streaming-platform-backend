@@ -3,15 +3,11 @@ from fastapi import HTTPException, status
 from fastapi.concurrency import run_in_threadpool
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-
 from app.core.security import hash_password, verify_password, create_access_token
 from app.db.models import User
 from app.schemas.auth import RegisterResponse, TokenResponse
-# from app.schemas.user import UserOut
-# from app.db.transaction import transaction
 
 logger = logging.getLogger(__name__)
-
 
 class AuthService:
     def __init__(self, db):
@@ -27,6 +23,8 @@ class AuthService:
             select(User).where(User.email == email)
         )
 
+        logger.debug("Checking for existing user during registration")
+
         if is_existing_user:
             raise integrity_exception
 
@@ -34,7 +32,7 @@ class AuthService:
             email=email,
             hashed_password=await run_in_threadpool(hash_password, password),
         )
-
+        
         try:
             async with self.db.begin():
                 self.db.add(user)
