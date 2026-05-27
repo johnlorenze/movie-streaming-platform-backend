@@ -11,6 +11,8 @@ wheels/
 
 # Environment variables
 .env
+.env.*
+!.env.example
 
 # Alembic
 alembic/versions/*.pyc

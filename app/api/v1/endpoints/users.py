@@ -1,4 +1,3 @@
-import uuid
 from fastapi import APIRouter, Depends, status
 from app.db.database import get_db
 from app.services.auth_service import AuthService
