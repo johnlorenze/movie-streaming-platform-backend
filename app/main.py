@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from app.db.database import Base, engine
+from app.db.database import engine
+from app.api.v1.api import api_router
+from app.core.exception_handlers import register_exception_handlers
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -10,6 +12,10 @@ async def lifespan(app: FastAPI):
     await engine.dispose()
 
 app = FastAPI(title="Movie Streaming Platform", version="1.0", lifespan=lifespan)
+
+app.include_router(api_router, prefix="/api/v1")
+
+register_exception_handlers(app)
 
 @app.get("/")
 def read_root():

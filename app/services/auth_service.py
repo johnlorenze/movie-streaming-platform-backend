@@ -1,0 +1,73 @@
+import logging
+from fastapi import HTTPException, status
+from fastapi.concurrency import run_in_threadpool
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+from app.core.security import hash_password, verify_password, create_access_token
+from app.db.models import User
+from app.schemas.auth import RegisterResponse, TokenResponse
+from app.core.exceptions import EmailAlreadyRegisteredException, InvalidCredentialsException
+
+logger = logging.getLogger(__name__)
+
+class AuthService:
+    def __init__(self, db):
+        self.db = db
+
+    async def register_user(self, email: str, password: str) -> RegisterResponse:
+        integrity_exception = HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered",
+        )
+
+        is_existing_user = await self.db.scalar(
+            select(User).where(User.email == email)
+        )
+
+        logger.debug("Checking for existing user during registration")
+
+        if is_existing_user:
+            raise EmailAlreadyRegisteredException()
+
+        user = User(
+            email=email,
+            hashed_password=await run_in_threadpool(hash_password, password),
+        )
+
+        try:
+            async with self.db.begin():
+                self.db.add(user)
+
+            await self.db.refresh(user)
+
+            return RegisterResponse(
+                message="User registered successfully",
+                user_id=str(user.id)
+            )
+        except IntegrityError as e:
+            logger.error(f"Database integrity error during registration: {e}")
+            raise EmailAlreadyRegisteredException()
+
+    async def login_user(self, email: str, password: str) -> TokenResponse:
+        credentials_exception = HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+        )
+
+        user = await self.db.scalar(
+            select(User).where(User.email == email)
+        )
+
+        if not user or not user.is_active:
+            raise InvalidCredentialsException()
+
+        is_valid_password = await run_in_threadpool(verify_password, password, user.hashed_password)
+
+        if not is_valid_password:
+            raise InvalidCredentialsException()
+
+        access_token = create_access_token(str(user.id))
+
+        return TokenResponse(
+            access_token=access_token
+        )
