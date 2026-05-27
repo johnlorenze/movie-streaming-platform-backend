@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from app.core.security import hash_password, verify_password, create_access_token
 from app.db.models import User
 from app.schemas.auth import RegisterResponse, TokenResponse
+from app.core.exceptions import EmailAlreadyRegisteredException, InvalidCredentialsException
 
 logger = logging.getLogger(__name__)
 
@@ -26,13 +27,13 @@ class AuthService:
         logger.debug("Checking for existing user during registration")
 
         if is_existing_user:
-            raise integrity_exception
+            raise EmailAlreadyRegisteredException()
 
         user = User(
             email=email,
             hashed_password=await run_in_threadpool(hash_password, password),
         )
-        
+
         try:
             async with self.db.begin():
                 self.db.add(user)
@@ -45,7 +46,7 @@ class AuthService:
             )
         except IntegrityError as e:
             logger.error(f"Database integrity error during registration: {e}")
-            raise integrity_exception
+            raise EmailAlreadyRegisteredException()
 
     async def login_user(self, email: str, password: str) -> TokenResponse:
         credentials_exception = HTTPException(
@@ -58,12 +59,12 @@ class AuthService:
         )
 
         if not user or not user.is_active:
-            raise credentials_exception
+            raise InvalidCredentialsException()
 
         is_valid_password = await run_in_threadpool(verify_password, password, user.hashed_password)
 
         if not is_valid_password:
-            raise credentials_exception
+            raise InvalidCredentialsException()
 
         access_token = create_access_token(str(user.id))
 

@@ -16,3 +16,6 @@ wheels/
 
 # Alembic
 alembic/versions/*.pyc
+
+# remove this later
+backend_structure.md
