@@ -1,11 +1,14 @@
 
 import uuid
 from datetime import datetime
-
+from typing import TYPE_CHECKING
 from sqlalchemy import Integer, ForeignKey, DateTime, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.database import Base
+
+if TYPE_CHECKING:
+    from app.db.models.users import User
 
 class WatchList(Base):
     __tablename__ = "watchlists"

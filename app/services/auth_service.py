@@ -18,6 +18,11 @@ class AuthService:
         self.user_repository = UserRepository(db)
 
     async def register_user(self, email: str, password: str) -> RegisterResponse:
+        user = User(
+            email=email,
+            hashed_password=await run_in_threadpool(hash_password, password),
+        )
+
         async with self.db.begin():
             is_existing_user = await self.user_repository.get_user_by_email(email)
 
@@ -25,11 +30,6 @@ class AuthService:
 
             if is_existing_user:
                 raise EmailAlreadyRegisteredException()
-
-            user = User(
-                email=email,
-                hashed_password=await run_in_threadpool(hash_password, password),
-            )
 
             await self.user_repository.create_user(user)
 

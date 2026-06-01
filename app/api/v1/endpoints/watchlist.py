@@ -25,7 +25,7 @@ async def add_to_watchlist(
 ) -> AddOrRemoveToWatchlistResponse:
     user_id = current_user.id
     movie_id = payload.movie_id
-    print(f"Adding movie with ID {movie_id} to watchlist for user ID {user_id}")
+
     watchlist_service = WatchlistService(db)
 
     return await watchlist_service.add_to_watchlist(user_id, movie_id)
