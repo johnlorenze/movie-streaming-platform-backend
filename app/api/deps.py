@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.security import decode_access_token
 from app.db.database import get_db
-from app.db.models import User
+from app.db.models.users import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/users/login")
 

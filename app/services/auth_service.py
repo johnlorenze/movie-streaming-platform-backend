@@ -1,62 +1,47 @@
 import logging
-from fastapi import HTTPException, status
 from fastapi.concurrency import run_in_threadpool
-from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.security import hash_password, verify_password, create_access_token
-from app.db.models import User
+from app.db.models.users import User
 from app.schemas.auth import RegisterResponse, TokenResponse
 from app.core.exceptions import EmailAlreadyRegisteredException, InvalidCredentialsException
+from app.repositories.user_repository import UserRepository
 
 logger = logging.getLogger(__name__)
 
 class AuthService:
-    def __init__(self, db):
+    def __init__(
+        self,
+        db: AsyncSession
+    ):
         self.db = db
+        self.user_repository = UserRepository(db)
 
     async def register_user(self, email: str, password: str) -> RegisterResponse:
-        integrity_exception = HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered",
-        )
+        async with self.db.begin():
+            is_existing_user = await self.user_repository.get_user_by_email(email)
 
-        is_existing_user = await self.db.scalar(
-            select(User).where(User.email == email)
-        )
+            logger.debug("Checking for existing user during registration")
 
-        logger.debug("Checking for existing user during registration")
+            if is_existing_user:
+                raise EmailAlreadyRegisteredException()
 
-        if is_existing_user:
-            raise EmailAlreadyRegisteredException()
-
-        user = User(
-            email=email,
-            hashed_password=await run_in_threadpool(hash_password, password),
-        )
-
-        try:
-            async with self.db.begin():
-                self.db.add(user)
-
-            await self.db.refresh(user)
-
-            return RegisterResponse(
-                message="User registered successfully",
-                user_id=str(user.id)
+            user = User(
+                email=email,
+                hashed_password=await run_in_threadpool(hash_password, password),
             )
-        except IntegrityError as e:
-            logger.error(f"Database integrity error during registration: {e}")
-            raise EmailAlreadyRegisteredException()
+
+            await self.user_repository.create_user(user)
+
+        await self.db.refresh(user)
+
+        return RegisterResponse(
+            message="User registered successfully",
+            user_id=str(user.id)
+        )
 
     async def login_user(self, email: str, password: str) -> TokenResponse:
-        credentials_exception = HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-        )
-
-        user = await self.db.scalar(
-            select(User).where(User.email == email)
-        )
+        user = await self.user_repository.get_user_by_email(email)
 
         if not user or not user.is_active:
             raise InvalidCredentialsException()
