@@ -18,7 +18,7 @@ class WatchlistRepository:
 
         return watchlist.all()
 
-    async def remove_from_watchlist(self, user_id, movie_id):
+    async def remove_from_watchlist(self, user_id: UUID, movie_id: int) -> None:
         entry = await self.db.scalar(
             select(WatchList).where(
                 WatchList.user_id == user_id,
