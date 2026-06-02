@@ -38,5 +38,5 @@ async def get_current_user(
             raise credentials_exception
 
         return user
-    except (JWTError, ValueError, TypeError):
+    except (JWTError, ValueError, TypeError, AttributeError):
         raise credentials_exception

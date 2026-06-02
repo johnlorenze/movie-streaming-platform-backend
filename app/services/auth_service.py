@@ -17,7 +17,17 @@ class AuthService:
         self.db = db
         self.user_repository = UserRepository(db)
 
-    async def register_user(self, email: str, password: str) -> RegisterResponse:
+    @staticmethod
+    def _build_token_response(user: User) -> TokenResponse:
+        access_token = create_access_token(str(user.id))
+
+        return TokenResponse(
+            access_token=access_token,
+            user_id=user.id,
+            email=user.email
+        )
+
+    async def register_user(self, email: str, password: str) -> TokenResponse:
         user = User(
             email=email,
             hashed_password=await run_in_threadpool(hash_password, password),
@@ -35,10 +45,7 @@ class AuthService:
 
         await self.db.refresh(user)
 
-        return RegisterResponse(
-            message="User registered successfully",
-            user_id=str(user.id)
-        )
+        return self._build_token_response(user)
 
     async def login_user(self, email: str, password: str) -> TokenResponse:
         user = await self.user_repository.get_user_by_email(email)
@@ -51,8 +58,4 @@ class AuthService:
         if not is_valid_password:
             raise InvalidCredentialsException()
 
-        access_token = create_access_token(str(user.id))
-
-        return TokenResponse(
-            access_token=access_token
-        )
+        return self._build_token_response(user)
