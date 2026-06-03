@@ -9,6 +9,7 @@ from app.schemas.watchlist import (
     AddOrRemoveToWatchlistResponse,
     GetFromWatchlistResponse
 )
+from app.core.constants.summary_and_descriptions import SummaryAndDescriptions
 
 router = APIRouter(
     prefix="/watchlist",
@@ -17,8 +18,8 @@ router = APIRouter(
 
 @router.post(
     "/",
-    summary="Add a movie to the user's watchlist",
-    description="Adds a specified movie to the authenticated user's watchlist",
+    summary=SummaryAndDescriptions.SUMM_ADD_TO_WATCHLIST,
+    description=SummaryAndDescriptions.DESC_ADD_TO_WATCHLIST,
     status_code=status.HTTP_201_CREATED,
     response_model=AddOrRemoveToWatchlistResponse
 )
@@ -36,8 +37,8 @@ async def add_to_watchlist(
 
 @router.get(
     "/",
-    summary="Get the user's watchlist",
-    description="Retrieves the authenticated user's watchlist",
+    summary=SummaryAndDescriptions.SUMM_GET_WATCHLIST,
+    description=SummaryAndDescriptions.DESC_GET_WATCHLIST,
     status_code=status.HTTP_200_OK,
     response_model=GetFromWatchlistResponse
 )
@@ -53,8 +54,8 @@ async def get_watchlist(
 
 @router.delete(
     "/{movie_id}",
-    summary="Remove a movie from the user's watchlist",
-    description="Removes a specified movie from the authenticated user's watchlist",
+    summary=SummaryAndDescriptions.SUMM_REMOVE_FROM_WATCHLIST,
+    description=SummaryAndDescriptions.DESC_REMOVE_FROM_WATCHLIST,
     status_code=status.HTTP_200_OK,
     response_model=AddOrRemoveToWatchlistResponse
 )
