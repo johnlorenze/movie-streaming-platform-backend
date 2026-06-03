@@ -21,9 +21,9 @@ router = APIRouter(
     summary="Create a new user",
     description="Registers a user with email and password",
     status_code=status.HTTP_201_CREATED,
-    response_model=RegisterResponse
+    response_model=TokenResponse
 )
-async def register(payload: RegisterRequest, db: AsyncSession=Depends(get_db)) -> RegisterResponse:
+async def register(payload: RegisterRequest, db: AsyncSession=Depends(get_db)) -> TokenResponse:
     """Creates a user in the system"""
 
     auth_service = AuthService(db)

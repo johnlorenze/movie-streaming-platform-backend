@@ -31,6 +31,12 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    user_id: UUID
+    email: str
+
+    model_config = {
+        "from_attributes": True
+    }
 
 class UserResponse(BaseModel):
     id: UUID

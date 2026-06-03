@@ -24,6 +24,10 @@ async def get_current_user(
 
     try:
         payload = decode_access_token(token)
+
+        if payload is None:
+            raise credentials_exception
+
         user_id: str = payload.get("sub")
 
         if user_id is None:
@@ -38,5 +42,5 @@ async def get_current_user(
             raise credentials_exception
 
         return user
-    except (JWTError, ValueError, TypeError):
+    except (JWTError, ValueError, TypeError, AttributeError):
         raise credentials_exception
