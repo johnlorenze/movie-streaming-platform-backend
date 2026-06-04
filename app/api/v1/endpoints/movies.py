@@ -11,5 +11,8 @@ router = APIRouter(prefix="/movies", tags=["movies"])
     description="Fetches a list of trending movies for the week.",
     response_model=MovieListResponse
 )
-async def get_trending_movies(movie_service: MovieService = Depends(get_movie_service)) -> MovieListResponse:
-    return await movie_service.get_trending_movies()
+async def get_trending_movies(
+        page: int = 1,
+        movie_service: MovieService = Depends(get_movie_service)
+) -> MovieListResponse:
+    return await movie_service.get_trending_movies(page)
