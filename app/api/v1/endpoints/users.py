@@ -10,6 +10,7 @@ from app.schemas.auth import (
 )
 from app.services.auth_service import AuthService
 from app.api.deps import get_current_user
+from app.core.constants.summary_and_descriptions import SummaryAndDescriptions
 
 router = APIRouter(
     prefix="/users",
@@ -18,8 +19,8 @@ router = APIRouter(
 
 @router.post(
     "/register",
-    summary="Create a new user",
-    description="Registers a user with email and password",
+    summary=SummaryAndDescriptions.SUMM_REGISTER,
+    description=SummaryAndDescriptions.DESC_REGISTER,
     status_code=status.HTTP_201_CREATED,
     response_model=TokenResponse
 )
@@ -32,8 +33,8 @@ async def register(payload: RegisterRequest, db: AsyncSession=Depends(get_db)) -
 
 @router.post(
     "/login",
-    summary="Login a user",
-    description="Authenticates a user with email and password",
+    summary=SummaryAndDescriptions.SUMM_LOGIN,
+    description=SummaryAndDescriptions.DESC_LOGIN,
     status_code=status.HTTP_200_OK,
     response_model=TokenResponse
 )
@@ -46,8 +47,8 @@ async def login_user(payload: LoginRequest, db: AsyncSession=Depends(get_db)) ->
 
 @router.get(
     "/me",
-    summary="Get current user",
-    description="Retrieves the currently authenticated user",
+    summary=SummaryAndDescriptions.SUMM_ME,
+    description=SummaryAndDescriptions.DESC_ME,
     status_code=status.HTTP_200_OK,
     response_model=UserResponse
 )

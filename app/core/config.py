@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     SECRET_KEY: str = Field(min_length=32)
     ALGORITHM: Literal["HS256", "HS384", "HS512"] = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(gt=0, le=60 * 24)
+    TMDB_API_KEY: str
+    TMDB_BASE_URL: str
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",
