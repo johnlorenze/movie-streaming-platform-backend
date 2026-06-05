@@ -47,18 +47,7 @@ class MovieService:
             lambda: self.tmdb_client.get_movie(movie_id)
         )
 
-        if movie is None or "id" not in movie:
-            raise HTTPException(
-                status_code=status.HTTP_502_BAD_GATEWAY,
-                detail="Invalid response from TMDB API"
-            )
-
-        return MovieSummary(
-            id=movie["id"],
-            title=movie["title"],
-            overview=movie["overview"],
-            poster_path=movie.get("poster_path")
-        )
+        return MovieMapper.to_summary(movie)
 
     async def get_recommendations(self, movie_id: int, page: int = 1) -> MovieListResponse:
         recommendations = await self._execute_tmdb_request(
@@ -84,6 +73,7 @@ class MovieService:
                 for v in videos["results"]
                 if v["site"] == "YouTube"
                 and v["type"] == "Trailer"
+                and "key" in v
             ),
             None,
         )

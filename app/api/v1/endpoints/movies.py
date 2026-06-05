@@ -59,7 +59,7 @@ async def get_movie_recommendations(
     "/{movie_id}/trailer",
     summary="Get Movie Trailer",
     description="Fetches the YouTube key for the trailer of a specific movie.",
-    response_model=MovieTrailerResponse
+    response_model=MovieTrailerResponse | None
 )
 async def get_movie_trailer(
     movie_id: int,
