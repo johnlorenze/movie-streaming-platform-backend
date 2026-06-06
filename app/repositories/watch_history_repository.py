@@ -13,7 +13,9 @@ class WatchHistoryRepository:
 
     async def get_watch_history(self, user_id: UUID) -> Sequence[WatchHistory]:
         watch_history = await self.db.scalars(
-            select(WatchHistory).where(WatchHistory.user_id == user_id)
+            select(WatchHistory)
+            .where(WatchHistory.user_id == user_id)
+            .order_by(WatchHistory.watched_at.desc())
         )
 
         return watch_history.all()

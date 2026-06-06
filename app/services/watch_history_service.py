@@ -30,21 +30,27 @@ class WatchHistoryService:
 
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Movie already exists in watchlist",
+                detail="Movie already exists in watch history"
             ) from e
         except Exception as e:
             await self.db.rollback()
 
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Failed to add movie to watchlist"
+                detail="Failed to add movie to watch history"
             ) from e
 
     async def get_watch_history(self, user_id: UUID) -> GetFromWatchHistoryResponse:
-        result = await self.watch_history_repository.get_watch_history(user_id)
-        movie_ids = [entry.movie_id for entry in result]
+        try:
+            result = await self.watch_history_repository.get_watch_history(user_id)
+            movie_ids = [entry.movie_id for entry in result]
 
-        return GetFromWatchHistoryResponse(movie_ids=movie_ids)
+            return GetFromWatchHistoryResponse(movie_ids=movie_ids)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to retrieve watch history"
+            ) from e
 
     async def remove_watch_history(self, user_id: UUID, movie_id: int):
         try:
