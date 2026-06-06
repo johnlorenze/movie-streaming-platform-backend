@@ -1,10 +1,15 @@
 
 import uuid
+from typing import TYPE_CHECKING
 from datetime import datetime
 from sqlalchemy import String, Boolean, DateTime, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.database import Base
+
+if TYPE_CHECKING:
+    from app.db.models.watchlists import WatchList
+    from app.db.models.watch_history import WatchHistory
 
 class User(Base):
     __tablename__ = "users"
@@ -28,6 +33,10 @@ class User(Base):
         nullable=False
     )
     watchlist: Mapped[list["WatchList"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+    watch_history: Mapped[list["WatchHistory"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan"
     )
