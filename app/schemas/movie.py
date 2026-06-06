@@ -8,3 +8,6 @@ class MovieSummary(BaseModel):
 
 class MovieListResponse(BaseModel):
     movies: list[MovieSummary]
+
+class MovieTrailerResponse(BaseModel):
+    youtube_key: str = Field(min_length=1)
