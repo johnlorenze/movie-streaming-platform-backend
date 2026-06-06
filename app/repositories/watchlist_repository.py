@@ -1,4 +1,4 @@
-from typing import Any, Sequence
+from typing import Sequence
 from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

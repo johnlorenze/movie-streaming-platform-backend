@@ -1,6 +1,6 @@
 import uuid
-from datetime import datetime
 from typing import TYPE_CHECKING
+from datetime import datetime
 from sqlalchemy import Integer, ForeignKey, DateTime, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -9,14 +9,14 @@ from app.db.database import Base
 if TYPE_CHECKING:
     from app.db.models.users import User
 
-class WatchList(Base):
-    __tablename__ = "watchlists"
+class WatchHistory(Base):
+    __tablename__ = "watch_history"
 
     __table_args__ = (
         UniqueConstraint(
             "user_id",
             "movie_id",
-            name="uq_watchlist_user_movie",
+            name="uq_watch_history_user_movie",
         ),
     )
 
@@ -30,9 +30,9 @@ class WatchList(Base):
         nullable=False
     )
     movie_id: Mapped[int] = mapped_column(Integer, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
+    watched_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
         nullable=False
     )
-    user: Mapped["User"] = relationship(back_populates="watchlist")
+    user: Mapped["User"] = relationship(back_populates="watch_history")
